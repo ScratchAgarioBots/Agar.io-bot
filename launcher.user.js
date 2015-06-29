@@ -15,7 +15,7 @@ Array.prototype.peek = function() {
     return this[this.length-1];
 }
 
-$.get('https://raw.githubusercontent.com/ScratchAgarioBots/launcher.user.js/master/launcher.user.js?1', function(data) {
+$.get('https://raw.githubusercontent.com/ScratchAgarioBots/agario-bot/master/launcher.user.js?1', function(data) {
   var latestVersion = data.replace(/(\r\n|\n|\r)/gm,"");
   latestVersion = latestVersion.substring(latestVersion.indexOf("// @version")+11,latestVersion.indexOf("// @grant"));
 
@@ -25,7 +25,7 @@ $.get('https://raw.githubusercontent.com/ScratchAgarioBots/launcher.user.js/mast
   if(latestVersion > myVersion)
   {
     alert("Update Available for launcher.user.js: V" + latestVersion + "\nGet the latest version from the GitHub page.");
-        window.open('https://github.com/ScratchAgarioBots/launcher.user.js/blob/master/launcher.user.js','_blank');
+        window.open('https://raw.githubusercontent.com/ScratchAgarioBots/agario-bot/master/launcher.user.js?1','_blank');
   }
   console.log('Current launcher.user.js Version: ' + myVersion + " on Github: " + latestVersion);
 });

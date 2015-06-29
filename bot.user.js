@@ -705,13 +705,6 @@ console.log("Running Apos Bot!");
     function findDestination() {
         var player = getPlayer()[0]; // has important properties X, Y, size
         var interNodes = getMemoryCells();
-        //console.log(interNodes);
-
-        function getCompositeAngle(arr) { // should this be outside like the other functions?
-            return (arr.reduce(function(a, b) {
-                return a + b
-            })) / arr.length;
-        }
 
         if ( /*!toggle*/ 1) {
             var useMouseX = (getMouseX() - getWidth() / 2 + getX() * getRatio()) / getRatio();
@@ -739,7 +732,7 @@ console.log("Running Apos Bot!");
             }
 
             enemies = enemies.filter(function(enemy) {
-                if (enemy.size * 1.1 > player.size * 2) { /* Work extra hard to avoid enemies that are big enough to split at you (with space) */
+                if (enemy.size * 1.1 > player.size * 2) { // Work extra hard to avoid enemies that are big enough to split at you (with space)
                     return computeDistance(player.x, player.y, enemy.x, enemy.y) <= player.size + enemy.size + buffer * 2;
                 } else {
                     return computeDistance(player.x, player.y, enemy.x, enemy.y) <= player.size + enemy.size + buffer;
@@ -764,15 +757,33 @@ console.log("Running Apos Bot!");
             var closestFoodItem;
             var foodDist = Infinity;
             var obtainableFood = food
-                .filter(function(item) { // [index][0] is x and [index][1] is y
-                    return computeDistance(player.x, player.y, item[0], item[1]) <= player.size + foodScope;
+                .filter(function(foodItem) { // [index][0] is x and [index][1] is y
+                    var safe = true;
+                    for (var i = 0; i < enemies.length; i++) {
+                        var enemy = enemies[i];
+                        if (enemy.size * 1.1 > player.size * 2) {
+                            if (computeDistance(foodItem[0], foodItem[1], enemy.x, enemy.y) <= enemy.size + buffer * 2) {
+                                safe = false;
+                                break;
+                            }
+                        } else {
+                            if (computeDistance(foodItem[0], foodItem[1], enemy.x, enemy.y) <= enemy.size + buffer) {
+                                safe = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (safe) {
+                        return computeDistance(player.x, player.y, foodItem[0], foodItem[1]) <= player.size + foodScope;
+                    }
+                    return false;
                 })
-                .map(function(item) {
-                    var newItem = item;
-                    newItem.dist = computeDistance(player.x, player.y, item[0], item[1]);
+                .map(function(foodItem) {
+                    var newItem = foodItem;
+                    newItem.dist = computeDistance(player.x, player.y, foodItem[0], foodItem[1]);
                     return newItem;
                 });
-
+            
             for (var i = 0; i < obtainableFood.length; i++) {
                 var food = obtainableFood[i];
                 var curDist = computeDistance(player.x, player.y, food[0], food[1]);
@@ -790,7 +801,25 @@ console.log("Running Apos Bot!");
 
             var foodClusters = getMinorClusters(allClustersAndFood)
                 .filter(function(cluster) {
-                    return computeDistance(player.x, player.y, cluster[0], cluster[1]) <= player.size + foodScope;
+                    var safe = true;
+                    for (var i = 0; i < enemies.length; i++) {
+                        var enemy = enemies[i];
+                        if (enemy.size * 1.1 > player.size * 2) {
+                            if (computeDistance(cluster[0], cluster[1], enemy.x, enemy.y) <= enemy.size + buffer * 2) {
+                                safe = false;
+                                break;
+                            }
+                        } else {
+                            if (computeDistance(cluster[0], cluster[1], enemy.x, enemy.y) <= enemy.size + buffer) {
+                                safe = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (safe) {
+                        return computeDistance(player.x, player.y, cluster[0], cluster[1]) <= player.size + foodScope;
+                    }
+                    return false;
                 })
                 .map(function(cluster) {
                     var newCluster = cluster;
